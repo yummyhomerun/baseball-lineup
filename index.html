@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>球隊今日先發陣容（完美修正版）</title>
+    <title>球員守備位置與打擊棒次</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -40,45 +40,47 @@
         th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
         th { background-color: #1a4329; color: white; }
 
-        /* 右側棒球場：改用正向扇形，不再旋轉，避免坐標錯亂 */
+        /* 右側棒球場：傳統四方形，不套用任何旋轉，安全第一 */
         .field-container {
             position: relative;
             width: 450px;
             height: 450px;
             background-color: #2e8b57;
             border: 5px solid #fff;
-            border-radius: 0 100% 0 0; /* 扇形 */
-            transform: scaleY(-1) rotate(-90deg); /* 翻轉成標準棒球場視角：本壘在正下方 */
+            border-radius: 12px; /* 乖乖做圓角矩形就好 */
             margin: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background-image: radial-gradient(circle at 50% 85%, #d2b48c 0px, #d2b48c 80px, transparent 81px); /* 內野泥土區示意 */
         }
         
-        /* 球員標籤：反向翻轉文字，確保文字永遠是正的 */
+        /* 球員標籤 */
         .player-badge {
             position: absolute;
             background: #fff;
             color: #333;
-            padding: 5px 10px;
+            padding: 6px 10px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 14px;
             border: 2px solid #1a4329;
-            transform: rotate(90deg) scaleY(-1); /* 轉回正常人類視覺 */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             text-align: center;
-            min-width: 55px;
+            min-width: 60px;
         }
 
-        /* 🎯 精準修正後的守備位置坐標 (適用於正向扇形) */
-        .C  { bottom: 25px;  left: 25px;  }
-        .P  { bottom: 125px; left: 125px; }
-        .1B { bottom: 65px;  left: 215px; }
-        .2B { bottom: 155px; left: 255px; }
-        .SS { bottom: 255px; left: 155px; }
-        .3B { bottom: 215px; left: 65px;  }
-        .LF { bottom: 330px; left: 110px; }
-        .CF { bottom: 310px; left: 310px; }
-        .RF { bottom: 110px; left: 330px; }
+        /* 🎯 以 450x450 正向常規坐標系進行絕對定位 */
+        /* bottom 代表距離底部多遠，left 代表距離左邊多遠 */
+        .C  { bottom: 20px;  left: 195px; } /* 本壘在最下方的中間 */
+        .P  { bottom: 130px; left: 195px; } /* 投手丘 */
+        
+        .1B { bottom: 200px; left: 310px; } /* 一壘在右 */
+        .2B { bottom: 270px; left: 260px; } /* 二壘在右中 */
+        .SS { bottom: 270px; left: 130px; } /* 游擊在左中 */
+        .3B { bottom: 200px; left: 80px;  } /* 三壘在左 */
+        
+        .LF { bottom: 350px; left: 50px;  } /* 左外野 */
+        .CF { bottom: 380px; left: 195px; } /* 中外野 */
+        .RF { bottom: 350px; left: 340px; } /* 右外野 */
     </style>
 </head>
 <body>
@@ -108,7 +110,7 @@
     </div>
 
     <script>
-        // ⚠️ 請更換成您自己的 Google 試算表 ID
+        // ⚠️ 請把引號內換成您自己的 Google 試算表 ID
         const sheetId = '1cdjXciZzhJ5eG_OfUt612M2DDR4K2vJhqKrecp2ZUoo'; 
         
         const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
@@ -126,10 +128,10 @@
                 for (let i = 1; i < rows.length; i++) {
                     if (!rows[i][0]) continue; 
                     
-                    const order = rows[i][0];  // A欄：棒次
-                    const pos = rows[i][1].toUpperCase(); // B欄：守位 (轉大寫避免錯字)
-                    const name = rows[i][2];   // C欄：姓名
-                    const num = rows[i][3];    // D欄：背號
+                    const order = rows[i][0];  
+                    const pos = rows[i][1].toUpperCase(); 
+                    const name = rows[i][2];   
+                    const num = rows[i][3];    
 
                     // 1. 填入表格
                     const tr = document.createElement('tr');
