@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>球員守備位置與打擊棒次</title>
+    <title>球員守備位置與棒次</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -20,99 +20,105 @@
         .container {
             display: none; /* 載入完成前先隱藏 */
             flex-wrap: wrap;
-            gap: 30px;
+            gap: 40px;
             justify-content: center;
-            max-width: 1100px;
+            max-width: 1200px;
             width: 100%;
             align-items: flex-start;
         }
 
-        /* 左側打擊表 */
+        /* 左側打擊順序表 */
         .lineup-table {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 320px;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            flex: 1.2;
+            min-width: 360px;
         }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
-        th { background-color: #1a4329; color: white; }
+        th, td { padding: 14px 10px; text-align: center; border-bottom: 1px solid #eee; font-size: 16px; }
+        th { background-color: #1a4329; color: white; font-weight: bold; border-radius: 4px; }
+        tr:hover { background-color: #f9f9f9; }
 
-        /* 右側棒球場：傳統四方形，不套用任何旋轉，安全第一 */
+        /* 棒球場視覺樣式 */
         .field-container {
             position: relative;
             width: 450px;
             height: 450px;
-            background-color: #2e8b57;
             border: 5px solid #fff;
-            border-radius: 12px; /* 乖乖做圓角矩形就好 */
-            margin: 20px;
+            border-radius: 0 100% 0 0; /* 扇形球場 */
+            transform: rotate(-45deg); /* 旋轉成正常視角 */
+            margin: 50px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            background-image: radial-gradient(circle at 50% 85%, #d2b48c 0px, #d2b48c 80px, transparent 81px); /* 內野泥土區示意 */
+
+            /* 內野紅土美化（直接從頂點鋪滿內野） */
+            background-image: 
+                radial-gradient(circle at 0% 100%, #b87333 0px, #b87333 240px, 
+                #2e8b57 241px);
         }
         
-        /* 球員標籤 */
+        /* 守備球員標籤 */
         .player-badge {
             position: absolute;
             background: #fff;
             color: #333;
-            padding: 6px 10px;
+            padding: 5px 10px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 14px;
             border: 2px solid #1a4329;
+            transform: rotate(45deg); /* 轉回正方向 */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             text-align: center;
             min-width: 60px;
         }
 
-        /* 🎯 以 450x450 正向常規坐標系進行絕對定位 */
-        /* bottom 代表距離底部多遠，left 代表距離左邊多遠 */
-        .C  { bottom: 20px;  left: 195px; } /* 本壘在最下方的中間 */
-        .P  { bottom: 130px; left: 195px; } /* 投手丘 */
+        /* 🎯 定位各個守備位置 (修正開頭不能為數字的 bug，並精密重新對稱配對) */
+        .pos-C  { bottom: 15px;  left: 5px;  } /* 本壘 */
+        .pos-P  { bottom: 70px; left: 60px; } /* 投手丘 */
         
-        .1B { bottom: 200px; left: 310px; } /* 一壘在右 */
-        .2B { bottom: 270px; left: 260px; } /* 二壘在右中 */
-        .SS { bottom: 270px; left: 130px; } /* 游擊在左中 */
-        .3B { bottom: 200px; left: 80px;  } /* 三壘在左 */
+        /* 內野紅土區守備（完美弧形對稱） */
+        .pos-1B { bottom: 15px;  left: 175px; } /* 一壘手 */
+        .pos-2B { bottom: 105px; left: 190px; } /* 二壘手 */
+        .pos-SS { bottom: 190px; left: 105px; } /* 游擊手 */
+        .pos-3B { bottom: 175px; left: 5px;  } /* 三壘手 */
         
-        .LF { bottom: 350px; left: 50px;  } /* 左外野 */
-        .CF { bottom: 380px; left: 195px; } /* 中外野 */
-        .RF { bottom: 350px; left: 340px; } /* 右外野 */
+        /* 外野綠草皮區守備（完美弧形對稱） */
+        .pos-LF { bottom: 330px; left: 60px;  } /* 左外野 */
+        .pos-CF { bottom: 250px; left: 240px; } /* 中外野 */
+        .pos-RF { bottom: 60px;  left: 330px; } /* 右外野 */
+
     </style>
 </head>
 <body>
 
-    <h1>今日先發名單與守備位置</h1>
+    <h1>球員守備位置與棒次</h1>
     <div id="loading" class="loading">正在連線 Google 試算表抓取最新名單...</div>
 
     <div class="container" id="mainContainer">
         <div class="lineup-table">
-            <h2>打擊順序</h2>
+            <h2>松體棒球隊</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>棒次</th>
-                        <th>守位</th>
-                        <th>姓名</th>
-                        <th>背號</th>
+                        <th style="width: 15%;">棒次</th>
+                        <th style="width: 20%;">守位</th>
+                        <th style="width: 45%;">姓名</th>
+                        <th style="width: 20%;">背號</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    </tbody>
+                </tbody>
             </table>
         </div>
 
         <div class="field-container" id="fieldContainer">
-            </div>
+        </div>
     </div>
 
     <script>
-        // ⚠️ 請把引號內換成您自己的 Google 試算表 ID
         const sheetId = '1cdjXciZzhJ5eG_OfUt612M2DDR4K2vJhqKrecp2ZUoo'; 
-        
         const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
 
         fetch(url)
@@ -135,14 +141,15 @@
 
                     // 1. 填入表格
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${order}</td><td>${pos}</td><td>${name}</td><td>${num}</td>`;
+                    tr.innerHTML = `<td><b>${order}</b></td><td>${pos}</td><td>${name}</td><td>${num}</td>`;
                     tableBody.appendChild(tr);
 
                     // 2. 渲染到球場上
                     const validPositions = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
                     if (validPositions.includes(pos)) {
                         const badge = document.createElement('div');
-                        badge.className = `player-badge ${pos}`;
+                        // 💡 關鍵修正：加上 pos- 前綴，避開數字開頭的 CSS 限制
+                        badge.className = `player-badge pos-${pos}`; 
                         badge.innerHTML = `${pos}<br>${name}`;
                         fieldContainer.appendChild(badge);
                     }
