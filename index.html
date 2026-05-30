@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>球隊今日先發陣容（自動更新版）</title>
+    <title>球隊今日先發陣容（完美修正版）</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -22,10 +22,12 @@
             flex-wrap: wrap;
             gap: 30px;
             justify-content: center;
-            max-width: 1200px;
+            max-width: 1100px;
             width: 100%;
+            align-items: flex-start;
         }
 
+        /* 左側打擊表 */
         .lineup-table {
             background: white;
             padding: 20px;
@@ -38,18 +40,20 @@
         th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
         th { background-color: #1a4329; color: white; }
 
+        /* 右側棒球場：改用正向扇形，不再旋轉，避免坐標錯亂 */
         .field-container {
             position: relative;
             width: 450px;
             height: 450px;
             background-color: #2e8b57;
             border: 5px solid #fff;
-            border-radius: 0 100% 0 0;
-            transform: rotate(-45deg);
-            margin: 50px;
+            border-radius: 0 100% 0 0; /* 扇形 */
+            transform: scaleY(-1) rotate(-90deg); /* 翻轉成標準棒球場視角：本壘在正下方 */
+            margin: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
+        /* 球員標籤：反向翻轉文字，確保文字永遠是正的 */
         .player-badge {
             position: absolute;
             background: #fff;
@@ -59,22 +63,22 @@
             font-weight: bold;
             font-size: 14px;
             border: 2px solid #1a4329;
-            transform: rotate(45deg);
+            transform: rotate(90deg) scaleY(-1); /* 轉回正常人類視覺 */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             text-align: center;
-            min-width: 60px;
+            min-width: 55px;
         }
 
-        /* 守位定位 */
-        .P  { bottom: 130px; left: 130px; }
-        .C  { bottom: 20px;  left: 20px;  }
-        .1B { bottom: 220px; left: 60px;  }
-        .2B { bottom: 260px; left: 160px; }
-        .3B { bottom: 60px;  left: 220px; }
-        .SS { bottom: 160px; left: 260px; }
-        .LF { bottom: 120px; left: 350px; }
-        .CF { bottom: 270px; left: 270px; }
-        .RF { bottom: 350px; left: 120px; }
+        /* 🎯 精準修正後的守備位置坐標 (適用於正向扇形) */
+        .C  { bottom: 25px;  left: 25px;  }
+        .P  { bottom: 125px; left: 125px; }
+        .1B { bottom: 65px;  left: 215px; }
+        .2B { bottom: 155px; left: 255px; }
+        .SS { bottom: 255px; left: 155px; }
+        .3B { bottom: 215px; left: 65px;  }
+        .LF { bottom: 330px; left: 110px; }
+        .CF { bottom: 310px; left: 310px; }
+        .RF { bottom: 110px; left: 330px; }
     </style>
 </head>
 <body>
@@ -104,47 +108,44 @@
     </div>
 
     <script>
-        // ⚠️ 請把下方引號內的字串，換成你自己的 Google 試算表 ID
+        // ⚠️ 請更換成您自己的 Google 試算表 ID
         const sheetId = '1cdjXciZzhJ5eG_OfUt612M2DDR4K2vJhqKrecp2ZUoo'; 
         
-        // 透過 Google 提供的 CSV 匯出連結來讀取資料
         const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
 
         fetch(url)
             .then(res => res.text())
             .then(data => {
-                // 解析 CSV 資料
                 const rows = data.split('\n').map(row => {
-                    return row.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1'));
+                    return row.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim());
                 });
 
                 const tableBody = document.getElementById('tableBody');
                 const fieldContainer = document.getElementById('fieldContainer');
                 
-                // 跳過第一列標題，從第二列開始跑資料
                 for (let i = 1; i < rows.length; i++) {
-                    if (!rows[i][0]) continue; // 略過空行
+                    if (!rows[i][0]) continue; 
                     
                     const order = rows[i][0];  // A欄：棒次
-                    const pos = rows[i][1];    // B欄：守位
-                    const name = rows[i][2];   // C欄：姓名 (已更換)
-                    const num = rows[i][3];    // D欄：背號 (已更換)
+                    const pos = rows[i][1].toUpperCase(); // B欄：守位 (轉大寫避免錯字)
+                    const name = rows[i][2];   // C欄：姓名
+                    const num = rows[i][3];    // D欄：背號
 
                     // 1. 填入表格
                     const tr = document.createElement('tr');
                     tr.innerHTML = `<td>${order}</td><td>${pos}</td><td>${name}</td><td>${num}</td>`;
                     tableBody.appendChild(tr);
 
-                    // 2. 如果不是 DH（指定打擊），就畫在球場上
-                    if (pos !== 'DH' && pos !== 'dh') {
+                    // 2. 渲染到球場上
+                    const validPositions = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
+                    if (validPositions.includes(pos)) {
                         const badge = document.createElement('div');
-                        badge.className = `player-badge ${pos.toUpperCase()}`;
-                        badge.innerHTML = `${pos.toUpperCase()}<br>${name}`;
+                        badge.className = `player-badge ${pos}`;
+                        badge.innerHTML = `${pos}<br>${name}`;
                         fieldContainer.appendChild(badge);
                     }
                 }
 
-                // 隱藏載入中，顯示網頁
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('mainContainer').style.display = 'flex';
             })
