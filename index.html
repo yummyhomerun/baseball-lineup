@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>球隊今日先發陣容</title>
+    <style>
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #1a4329; margin-bottom: 20px; }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* 棒次表樣式 */
+        .lineup-table {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 320px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        th { background-color: #1a4329; color: white; }
+        tr:hover { background-color: #f9f9f9; }
+
+        /* 棒球場視覺樣式 */
+        .field-container {
+            position: relative;
+            width: 450px;
+            height: 450px;
+            background-color: #2e8b57; /* 草皮綠 */
+            border: 5px solid #fff;
+            border-radius: 0 100% 0 0; /* 扇形球場 */
+            transform: rotate(-45deg); /* 旋轉成正常視角 */
+            margin: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* 守備球員標籤（修正旋轉角度讓文字變正的） */
+        .player-badge {
+            position: absolute;
+            background: #fff;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #1a4329;
+            transform: rotate(45deg); /* 轉回正方向 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 60px;
+        }
+
+        /* 定位各個守備位置 (以 450x450 扇形為基準) */
+        .P  { bottom: 130px; left: 130px; }
+        .C  { bottom: 20px;  left: 20px;  }
+        .1B { bottom: 220px; left: 60px;  }
+        .2B { bottom: 260px; left: 160px; }
+        .3B { bottom: 60px;  left: 220px; }
+        .SS { bottom: 160px; left: 260px; }
+        .LF { bottom: 120px; left: 350px; }
+        .CF { bottom: 270px; left: 270px; }
+        .RF { bottom: 350px; left: 120px; }
+    </style>
+</head>
+<body>
+
+    <h1>今日先發名單與守備位置</h1>
+
+    <div class="container">
+        <!-- 左側：打擊棒次表 -->
+        <div class="lineup-table">
+            <h2>打擊順序</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>棒次</th>
+                        <th>守位</th>
+                        <th>背號</th>
+                        <th>姓名</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>CF</td><td>8</td><td>陳傑憲</td></tr>
+                    <tr><td>2</td><td>RF</td><td>24</td><td>林安可</td></tr>
+                    <tr><td>3</td><td>3B</td><td>5</td><td>林立</td></tr>
+                    <tr><td>4</td><td>1B</td><td>25</td><td>朱育賢</td></tr>
+                    <tr><td>5</td><td>DH</td><td>91</td><td>林安可</td></tr>
+                    <tr><td>6</td><td>SS</td><td>90</td><td>江坤宇</td></tr>
+                    <tr><td>7</td><td>2B</td><td>6</td><td>岳東華</td></tr>
+                    <tr><td>8</td><td>C</td><td>4</td><td>吉力吉撈</td></tr>
+                    <tr><td>9</td><td>LF</td><td>77</td><td>曾頌恩</td></tr>
+                    <tr><td>P</td><td>P</td><td>18</td><td>古林睿煬</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 右側：簡易棒球場視覺化 -->
+        <div class="field-container">
+            <div class="player-badge P">P<br>古林</div>
+            <div class="player-badge C">C<br>吉力</div>
+            <div class="player-badge 1B">1B<br>朱育賢</div>
+            <div class="player-badge 2B">2B<br>岳東華</div>
+            <div class="player-badge 3B">3B<br>林立</div>
+            <div class="player-badge SS">SS<br>江坤宇</div>
+            <div class="player-badge LF">LF<br>曾頌恩</div>
+            <div class="player-badge CF">CF<br>陳傑憲</div>
+            <div class="player-badge RF">RF<br>林安可</div>
+        </div>
+    </div>
+
+</body>
+</html>
